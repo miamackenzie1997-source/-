@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="経費">
+<meta name="theme-color" content="#0f0f13">
+<title>経費アプリ</title>
+<link rel="manifest" href="keihi-manifest.json">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0f13;
+    --surface: #1a1a22;
+    --surface2: #22222e;
+    --border: #2e2e3e;
+    --accent: #fbbf24;
+    --accent2: #f472b6;
+    --text: #e8e8f0;
+    --muted: #7070a0;
+    --danger: #f87171;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: calc(40px + var(--safe-bottom));
+  }
+
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: calc(14px + var(--safe-top)) 20px 12px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  header h1 { font-size: 17px; font-weight: 700; color: var(--accent); }
+
+  .header-tab {
+    display: flex;
+    gap: 4px;
+    background: var(--surface2);
+    border-radius: 10px;
+    padding: 3px;
+  }
+
+  .htab {
+    padding: 5px 14px;
+    border: none;
+    border-radius: 7px;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    background: none;
+    color: var(--muted);
+    transition: all 0.15s;
+  }
+
+  .htab.active { background: var(--accent); color: #0f0f13; }
+
+  .page { display: none; }
+  .page.active { display: block; }
+
+  .form-wrap {
+    padding: 20px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .field label {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  input[type="text"],
+  input[type="date"],
+  input[type="tel"],
+  select,
+  textarea {
+    width: 100%;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    color: var(--text);
+    font-size: 16px;
+    font-family: 'Noto Sans JP', sans-serif;
+    padding: 14px 16px;
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+    transition: border-color 0.15s;
+  }
+
+  input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+  input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.5); }
+
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237070a0' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    padding-right: 40px;
+  }
+
+  textarea { resize: none; min-height: 80px; line-height: 1.6; }
+
+  .chip-group { display: flex; flex-wrap: wrap; gap: 8px; }
+
+  .chip {
+    padding: 10px 16px;
+    border: 1.5px solid var(--border);
+    border-radius: 100px;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--muted);
+    background: var(--surface);
+    cursor: pointer;
+    transition: all 0.12s;
+  }
+
+  .chip.selected {
+    border-color: var(--accent);
+    background: rgba(251,191,36,0.12);
+    color: var(--accent);
+  }
+
+  .submit-wrap { padding: 0 16px; margin-top: 4px; }
+
+  .btn-submit {
+    width: 100%;
+    padding: 18px;
+    border: none;
+    border-radius: 14px;
+    background: var(--accent);
+    color: #0f0f13;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .btn-submit:active { transform: scale(0.97); filter: brightness(0.9); }
+  .btn-submit:disabled { opacity: 0.45; pointer-events: none; }
+
+  .spacer-bottom { height: 40px; }
+
+  .spinner {
+    width: 18px; height: 18px;
+    border: 2.5px solid rgba(0,0,0,0.25);
+    border-top-color: #0f0f13;
+    border-radius: 50%;
+    animation: spin 0.65s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .offline-bar {
+    display: none;
+    background: rgba(248,113,113,0.12);
+    border-bottom: 1px solid rgba(248,113,113,0.3);
+    color: var(--danger);
+    text-align: center;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 7px;
+  }
+  .offline-bar.show { display: block; }
+
+  .toast {
+    position: fixed;
+    bottom: calc(24px + var(--safe-bottom));
+    left: 50%;
+    transform: translateX(-50%) translateY(12px);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 12px 22px;
+    border-radius: 100px;
+    font-size: 13px;
+    font-weight: 600;
+    z-index: 999;
+    opacity: 0;
+    transition: all 0.25s;
+    white-space: nowrap;
+    max-width: 88vw;
+    text-align: center;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast.ok  { border-color: var(--accent); color: var(--accent); }
+  .toast.err { border-color: var(--danger); color: var(--danger); }
+
+  /* HISTORY */
+  .history-wrap { padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+
+  .h-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 16px;
+  }
+
+  .h-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .h-date { font-size: 13px; font-weight: 700; color: var(--accent); }
+  .h-time { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  .h-badge { font-size: 11px; padding: 3px 9px; border-radius: 20px; }
+  .h-badge.ok  { background: rgba(251,191,36,0.12); color: var(--accent); }
+  .h-badge.err { background: rgba(248,113,113,0.12); color: var(--danger); }
+
+  .h-row { display: flex; justify-content: space-between; padding: 4px 0; font-size: 13px; }
+  .h-label { color: var(--muted); font-size: 12px; }
+  .h-val { font-weight: 500; }
+  .h-cat { color: var(--accent); font-weight: 700; }
+  .h-amount { color: var(--accent2); font-weight: 700; }
+
+  .empty { text-align: center; padding: 60px 20px; color: var(--muted); }
+  .empty .ico { font-size: 40px; margin-bottom: 12px; }
+
+  /* SETUP */
+  .setup-wrap { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+
+  .s-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+  }
+
+  .s-card h3 { font-size: 13px; font-weight: 700; color: var(--accent2); margin-bottom: 10px; }
+  .s-card p  { font-size: 12px; color: var(--muted); line-height: 1.7; margin-bottom: 10px; }
+
+  .steps { list-style: none; counter-reset: s; }
+  .steps li {
+    counter-increment: s;
+    font-size: 12px; color: var(--muted);
+    padding: 5px 0 5px 26px;
+    position: relative; line-height: 1.6;
+  }
+  .steps li::before {
+    content: counter(s);
+    position: absolute; left: 0; top: 6px;
+    width: 17px; height: 17px;
+    background: var(--accent2); color: #0f0f13;
+    border-radius: 50%; font-size: 10px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .steps li code {
+    background: var(--surface2); border: 1px solid var(--border);
+    padding: 1px 5px; border-radius: 4px;
+    font-size: 11px; color: var(--accent);
+  }
+
+  .gas-code {
+    font-family: monospace;
+    font-size: 11px;
+    min-height: 180px;
+    color: #9090b8;
+    background: #0a0a10;
+    border-color: var(--border);
+    line-height: 1.7;
+  }
+
+  .btn-copy {
+    width: 100%;
+    padding: 12px;
+    margin-top: 8px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .url-status { margin-top: 8px; font-size: 12px; }
+  .url-ok   { color: var(--accent); }
+  .url-warn { color: var(--danger); }
+  .url-none { color: var(--muted); }
+</style>
+</head>
+<body>
+
+<div class="offline-bar" id="offlineBar">📡 オフラインです</div>
+
+<header>
+  <h1>💴 経費</h1>
+  <div class="header-tab">
+    <button class="htab active" id="tab-form"    onclick="go('form')">入力</button>
+    <button class="htab"        id="tab-history" onclick="go('history')">履歴</button>
+    <button class="htab"        id="tab-setup"   onclick="go('setup')">設定</button>
+  </div>
+</header>
+
+<!-- ======== FORM ======== -->
+<div id="page-form" class="page active">
+  <div class="form-wrap">
+
+    <div class="field">
+      <label>日付</label>
+      <input type="date" id="fDate">
+    </div>
+
+    <div class="field">
+      <label>経費カテゴリ</label>
+      <div class="chip-group">
+        <button class="chip" onclick="selectChip(this,'消耗品')">消耗品</button>
+        <button class="chip" onclick="selectChip(this,'広告')">広告</button>
+        <button class="chip" onclick="selectChip(this,'交通費')">交通費</button>
+        <button class="chip" onclick="selectChip(this,'美容商材')">美容商材</button>
+        <button class="chip" onclick="selectChip(this,'外注')">外注</button>
+        <button class="chip" onclick="selectChip(this,'__other__')">その他</button>
+      </div>
+      <input type="hidden" id="fCategory">
+      <input type="text" id="fCategoryOther"
+        placeholder="カテゴリを入力"
+        inputmode="text" autocorrect="off"
+        style="display:none;margin-top:10px">
+    </div>
+
+    <div class="field">
+      <label>金額（円）</label>
+      <input type="tel" id="fAmount" placeholder="3000"
+        inputmode="numeric" pattern="[0-9]*">
+    </div>
+
+    <div class="field">
+      <label>支払い方法</label>
+      <select id="fPayment">
+        <option value="">選択してください</option>
+        <option value="現金">現金</option>
+        <option value="クレジットカード">クレジットカード</option>
+        <option value="電子マネー">電子マネー</option>
+        <option value="銀行振込">銀行振込</option>
+        <option value="その他">その他</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>内容</label>
+      <input type="text" id="fDetail" placeholder="例：シャンプー仕入れ"
+        inputmode="text" autocorrect="off">
+    </div>
+
+    <div class="field">
+      <label>メモ（任意）</label>
+      <textarea id="fMemo" placeholder="領収書番号など"></textarea>
+    </div>
+
+  </div>
+
+  <div class="submit-wrap">
+    <button class="btn-submit" id="submitBtn" onclick="submit()">送信</button>
+  </div>
+  <div class="spacer-bottom"></div>
+</div>
+
+<!-- ======== HISTORY ======== -->
+<div id="page-history" class="page">
+  <div class="history-wrap" id="historyList"></div>
+</div>
+
+<!-- ======== SETUP ======== -->
+<div id="page-setup" class="page">
+  <div class="setup-wrap">
+
+    <div class="s-card">
+      <h3>🔗 スプレッドシート連携</h3>
+      <p>既存の日報スプレッドシートに「経費」シートを追加して使います。日報シートは変更されません。</p>
+      <ul class="steps">
+        <li>日報と同じスプレッドシートを開く</li>
+        <li>下部の <code>＋</code> からシートを追加、名前を <code>経費</code> にする</li>
+        <li><code>拡張機能</code> → <code>Apps Script</code> を開く</li>
+        <li>既存のコードはそのままで、下のコードを<code>新しいスクリプトファイル</code>として追加して保存</li>
+        <li><code>デプロイ</code> → <code>新しいデプロイ</code> → <code>ウェブアプリ</code></li>
+        <li>アクセス: <code>全員</code> でデプロイ、URLをコピー</li>
+        <li>発行されたURLを下に入力</li>
+      </ul>
+    </div>
+
+    <div class="s-card">
+      <h3>📜 GASスクリプト（経費用）</h3>
+      <textarea class="gas-code" readonly onclick="this.select()">function doPostKeihi(e) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName('経費');
+  if (!sheet) sheet = ss.insertSheet('経費');
+  var d = JSON.parse(e.postData.contents);
+  if (sheet.getLastRow() === 0) {
+    sheet.appendRow(['日付','カテゴリ','金額(円)','支払い方法','内容','メモ','送信日時']);
+  }
+  sheet.appendRow([
+    d.date, d.category, d.amount,
+    d.payment, d.detail, d.memo,
+    new Date().toLocaleString('ja-JP')
+  ]);
+  return ContentService
+    .createTextOutput(JSON.stringify({status:'ok'}))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+function doGet(e) {
+  return ContentService
+    .createTextOutput(JSON.stringify({status:'ok'}))
+    .setMimeType(ContentService.MimeType.JSON);
+}</textarea>
+      <button class="btn-copy" onclick="copyGas()">📋 コピー</button>
+    </div>
+
+    <div class="s-card">
+      <h3>⚠️ デプロイ時の注意</h3>
+      <p>エントリーポイントが <code>doPost</code> ではなく <code>doPostKeihi</code> になっています。デプロイ設定の「実行する関数」を <code>doPostKeihi</code> に変更してください。</p>
+    </div>
+
+    <div class="s-card">
+      <h3>🌐 WebアプリURL</h3>
+      <div class="field">
+        <label>デプロイURLを貼り付け</label>
+        <input type="text" id="gasUrlInput"
+          placeholder="https://script.google.com/macros/s/..."
+          oninput="saveUrl()"
+          autocomplete="off" autocorrect="off" autocapitalize="off">
+      </div>
+      <div class="url-status" id="urlStatus"></div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let selectedCategory = '';
+let gasUrl = localStorage.getItem('keihiGasUrl') || '';
+let logs = JSON.parse(localStorage.getItem('keihiLogs') || '[]');
+
+// INIT
+document.getElementById('fDate').value = today();
+document.getElementById('gasUrlInput').value = gasUrl;
+updateUrlStatus();
+window.addEventListener('online',  () => document.getElementById('offlineBar').classList.remove('show'));
+window.addEventListener('offline', () => document.getElementById('offlineBar').classList.add('show'));
+if (!navigator.onLine) document.getElementById('offlineBar').classList.add('show');
+
+function today() {
+  return new Date().toISOString().split('T')[0];
+}
+
+function go(name) {
+  ['form','history','setup'].forEach(t => {
+    document.getElementById('page-' + t).classList.toggle('active', t === name);
+    document.getElementById('tab-' + t).classList.toggle('active', t === name);
+  });
+  if (name === 'history') renderHistory();
+}
+
+function selectChip(el, val) {
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedCategory = val;
+  const other = document.getElementById('fCategoryOther');
+  if (val === '__other__') {
+    other.style.display = 'block';
+    other.focus();
+  } else {
+    other.style.display = 'none';
+    other.value = '';
+  }
+}
+
+async function submit() {
+  const date     = document.getElementById('fDate').value;
+  const category = selectedCategory === '__other__'
+    ? document.getElementById('fCategoryOther').value.trim()
+    : selectedCategory;
+  const amount   = document.getElementById('fAmount').value.trim();
+  const payment  = document.getElementById('fPayment').value;
+  const detail   = document.getElementById('fDetail').value.trim();
+  const memo     = document.getElementById('fMemo').value.trim();
+
+  if (!selectedCategory)   { toast('カテゴリを選択してください', 'err'); return; }
+  if (!category)           { toast('カテゴリの内容を入力してください', 'err'); return; }
+  if (!amount)             { toast('金額を入力してください', 'err'); return; }
+  if (!payment)            { toast('支払い方法を選択してください', 'err'); return; }
+  if (!detail)             { toast('内容を入力してください', 'err'); return; }
+  if (!gasUrl)             { toast('設定でURLを入力してください', 'err'); go('setup'); return; }
+  if (!navigator.onLine)   { toast('📡 オフラインです', 'err'); return; }
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner"></div>';
+
+  const payload = { date, category, amount, payment, detail, memo };
+
+  try {
+    await fetch(gasUrl, {
+      method: 'POST',
+      mode: 'no-cors',
+      body: JSON.stringify(payload),
+      headers: { 'Content-Type': 'text/plain' }
+    });
+
+    savelog(payload, true);
+    resetForm();
+    btn.disabled = false;
+    btn.innerHTML = '送信';
+    toast('✅ 送信しました！', 'ok');
+
+  } catch(e) {
+    savelog(payload, false);
+    btn.disabled = false;
+    btn.innerHTML = '送信';
+    toast('⚠️ 送信失敗しました', 'err');
+  }
+}
+
+function resetForm() {
+  document.getElementById('fDate').value = today();
+  document.getElementById('fAmount').value = '';
+  document.getElementById('fPayment').value = '';
+  document.getElementById('fDetail').value = '';
+  document.getElementById('fMemo').value = '';
+  document.getElementById('fCategoryOther').style.display = 'none';
+  document.getElementById('fCategoryOther').value = '';
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+  selectedCategory = '';
+}
+
+function savelog(payload, ok) {
+  logs.unshift({ ...payload, ok, at: new Date().toLocaleString('ja-JP') });
+  if (logs.length > 60) logs = logs.slice(0, 60);
+  localStorage.setItem('keihiLogs', JSON.stringify(logs));
+}
+
+function renderHistory() {
+  const el = document.getElementById('historyList');
+  if (!logs.length) {
+    el.innerHTML = '<div class="empty"><div class="ico">📭</div>まだ履歴がありません</div>';
+    return;
+  }
+  el.innerHTML = logs.map(r => `
+    <div class="h-card">
+      <div class="h-top">
+        <div>
+          <div class="h-date">${r.date}</div>
+          <div class="h-time">${r.at}</div>
+        </div>
+        <span class="h-badge ${r.ok ? 'ok' : 'err'}">${r.ok ? '✓ 送信済み' : '✗ 失敗'}</span>
+      </div>
+      <div class="h-row"><span class="h-label">カテゴリ</span><span class="h-cat">${r.category}</span></div>
+      <div class="h-row"><span class="h-label">金額</span><span class="h-amount">¥${Number(r.amount).toLocaleString()}</span></div>
+      <div class="h-row"><span class="h-label">支払い</span><span class="h-val">${r.payment}</span></div>
+      <div class="h-row"><span class="h-label">内容</span><span class="h-val">${r.detail}</span></div>
+      ${r.memo ? `<div class="h-row"><span class="h-label">メモ</span><span class="h-val">${r.memo}</span></div>` : ''}
+    </div>
+  `).join('');
+}
+
+function saveUrl() {
+  gasUrl = document.getElementById('gasUrlInput').value.trim();
+  localStorage.setItem('keihiGasUrl', gasUrl);
+  updateUrlStatus();
+}
+
+function updateUrlStatus() {
+  const el = document.getElementById('urlStatus');
+  if (gasUrl && gasUrl.startsWith('https://script.google.com')) {
+    el.className = 'url-status url-ok';
+    el.textContent = '✓ URLが設定されています';
+  } else if (gasUrl) {
+    el.className = 'url-status url-warn';
+    el.textContent = '⚠ URLの形式を確認してください';
+  } else {
+    el.className = 'url-status url-none';
+    el.textContent = 'URLが未設定です';
+  }
+}
+
+function copyGas() {
+  navigator.clipboard.writeText(document.querySelector('.gas-code').value)
+    .then(() => toast('📋 コピーしました', 'ok'));
+}
+
+function toast(msg, type) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show ' + (type || '');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => { el.className = 'toast'; }, 2600);
+}
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>
