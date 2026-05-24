@@ -7,10 +7,9 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="日報">
 <meta name="theme-color" content="#0f0f13">
-<title>日報アプリ</title>
+<title>日報</title>
 <link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="icon-192.png">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root {
     --bg: #0f0f13;
@@ -20,639 +19,539 @@
     --accent: #6ee7b7;
     --accent2: #818cf8;
     --text: #e8e8f0;
-    --text-muted: #7070a0;
+    --muted: #7070a0;
     --danger: #f87171;
-    --radius: 16px;
     --safe-top: env(safe-area-inset-top, 0px);
     --safe-bottom: env(safe-area-inset-bottom, 0px);
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
-  html, body {
-    height: 100%;
-    overscroll-behavior: none;
-  }
-
   body {
     font-family: 'Noto Sans JP', sans-serif;
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
-    padding-bottom: calc(80px + var(--safe-bottom));
+    padding-bottom: calc(40px + var(--safe-bottom));
   }
 
-  /* HEADER */
+  /* ---- HEADER ---- */
   header {
     background: var(--surface);
     border-bottom: 1px solid var(--border);
-    padding: calc(16px + var(--safe-top)) 20px 14px;
+    padding: calc(14px + var(--safe-top)) 20px 12px;
     position: sticky;
     top: 0;
-    z-index: 100;
-  }
-
-  header h1 { font-size: 18px; font-weight: 700; color: var(--accent); }
-  header p { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
-
-  /* BOTTOM NAV */
-  .bottom-nav {
-    position: fixed;
-    bottom: 0;
-    left: 0; right: 0;
-    background: var(--surface);
-    border-top: 1px solid var(--border);
+    z-index: 10;
     display: flex;
-    padding-bottom: var(--safe-bottom);
-    z-index: 100;
-  }
-
-  .nav-btn {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
     align-items: center;
-    gap: 3px;
-    padding: 10px 0 8px;
+    justify-content: space-between;
+  }
+
+  header h1 { font-size: 17px; font-weight: 700; color: var(--accent); }
+
+  .header-tab {
+    display: flex;
+    gap: 4px;
+    background: var(--surface2);
+    border-radius: 10px;
+    padding: 3px;
+  }
+
+  .htab {
+    padding: 5px 14px;
     border: none;
-    background: none;
-    color: var(--text-muted);
+    border-radius: 7px;
     font-family: 'Noto Sans JP', sans-serif;
-    font-size: 10px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: color 0.15s;
-  }
-
-  .nav-btn .icon { font-size: 22px; line-height: 1; }
-  .nav-btn.active { color: var(--accent); }
-
-  /* PAGES */
-  .page { display: none; padding: 16px; }
-  .page.active { display: block; }
-
-  /* CARDS */
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 16px;
-    margin-bottom: 12px;
-  }
-
-  .card h2 { font-size: 13px; font-weight: 700; color: var(--accent2); margin-bottom: 12px; }
-
-  /* FIELDS */
-  .field { margin-bottom: 14px; }
-  .field:last-child { margin-bottom: 0; }
-
-  label {
-    display: block;
     font-size: 12px;
     font-weight: 600;
-    color: var(--text-muted);
+    cursor: pointer;
+    background: none;
+    color: var(--muted);
+    transition: all 0.15s;
+  }
+
+  .htab.active {
+    background: var(--accent);
+    color: #0f0f13;
+  }
+
+  /* ---- PAGE ---- */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* ---- FORM ---- */
+  .form-wrap {
+    padding: 20px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .field label {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    text-transform: uppercase;
     margin-bottom: 6px;
-    letter-spacing: 0.03em;
   }
 
   input[type="text"],
   input[type="date"],
-  input[type="number"],
   input[type="tel"],
-  textarea,
-  select {
+  select,
+  textarea {
     width: 100%;
-    background: var(--surface2);
+    background: var(--surface);
     border: 1.5px solid var(--border);
     border-radius: 12px;
     color: var(--text);
-    font-size: 16px; /* 16px = iOSズームなし */
+    font-size: 16px;
     font-family: 'Noto Sans JP', sans-serif;
     padding: 14px 16px;
     outline: none;
-    transition: border-color 0.2s;
     -webkit-appearance: none;
     appearance: none;
+    transition: border-color 0.15s;
   }
 
-  input:focus, textarea:focus, select:focus {
+  input:focus, select:focus, textarea:focus {
     border-color: var(--accent);
   }
 
-  input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.6); }
+  input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.5); }
 
   select {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237070a0' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237070a0' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 16px center;
     padding-right: 40px;
   }
 
-  .row-2 { display: flex; gap: 10px; }
-  .row-2 .field { flex: 1; }
+  textarea {
+    resize: none;
+    min-height: 80px;
+    line-height: 1.6;
+  }
 
-  /* BUTTONS */
-  .btn {
+  .row2 { display: flex; gap: 10px; }
+  .row2 .field { flex: 1; }
+
+  /* ---- MENU CHIPS ---- */
+  .chip-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .chip {
+    padding: 10px 18px;
+    border: 1.5px solid var(--border);
+    border-radius: 100px;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--muted);
+    background: var(--surface);
+    cursor: pointer;
+    transition: all 0.12s;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .chip.selected {
+    border-color: var(--accent2);
+    background: rgba(129,140,248,0.15);
+    color: var(--accent2);
+  }
+
+  /* ---- SUBMIT ---- */
+  .submit-wrap {
+    padding: 0 16px;
+    margin-top: 4px;
+  }
+
+  .btn-submit {
     width: 100%;
     padding: 18px;
     border: none;
     border-radius: 14px;
+    background: var(--accent);
+    color: #0f0f13;
     font-family: 'Noto Sans JP', sans-serif;
-    font-size: 16px;
+    font-size: 17px;
     font-weight: 700;
     cursor: pointer;
-    transition: all 0.15s;
     letter-spacing: 0.02em;
-  }
-
-  .btn-primary { background: var(--accent); color: #0f0f13; }
-  .btn-primary:active { transform: scale(0.97); filter: brightness(0.9); }
-
-  .btn-secondary {
-    background: var(--surface2);
-    color: var(--text);
-    border: 1px solid var(--border);
-    padding: 14px;
-    font-size: 14px;
-  }
-
-  .btn-add {
-    width: 100%;
-    padding: 14px;
-    background: transparent;
-    border: 1.5px solid var(--accent);
-    border-radius: 12px;
-    color: var(--accent);
-    font-family: 'Noto Sans JP', sans-serif;
-    font-size: 15px;
-    font-weight: 700;
-    cursor: pointer;
-    margin-top: 4px;
-  }
-
-  .btn-add:active { background: rgba(110,231,183,0.08); }
-
-  .btn:disabled { opacity: 0.4; pointer-events: none; }
-
-  /* CUSTOMER LIST */
-  .customer-list { margin-bottom: 12px; }
-
-  .customer-item {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 13px 14px;
-    margin-bottom: 8px;
+    transition: all 0.15s;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    animation: slideIn 0.2s ease;
-  }
-
-  @keyframes slideIn {
-    from { opacity: 0; transform: translateY(-6px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  .customer-info { flex: 1; }
-  .customer-name { font-size: 15px; font-weight: 600; margin-bottom: 3px; }
-  .customer-meta { font-size: 12px; color: var(--text-muted); }
-  .customer-menu-tag {
-    display: inline-block;
-    background: rgba(129,140,248,0.15);
-    color: var(--accent2);
-    border-radius: 6px;
-    padding: 1px 7px;
-    font-size: 11px;
-    font-weight: 700;
-    margin-right: 4px;
-  }
-
-  .btn-delete {
-    background: none;
-    border: none;
-    color: var(--text-muted);
-    font-size: 22px;
-    cursor: pointer;
-    padding: 4px 4px 4px 12px;
-    line-height: 1;
-    min-width: 40px;
-    text-align: right;
-  }
-
-  /* HISTORY */
-  .history-item {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 14px;
-    margin-bottom: 10px;
-    animation: slideIn 0.2s ease;
-  }
-
-  .history-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .history-date { font-size: 13px; font-weight: 700; font-family: 'DM Mono', monospace; color: var(--accent); }
-  .history-time { font-size: 11px; color: var(--text-muted); }
-
-  .history-status {
-    font-size: 11px;
-    padding: 2px 8px;
-    border-radius: 20px;
-  }
-  .status-ok { background: rgba(110,231,183,0.15); color: var(--accent); }
-  .status-fail { background: rgba(248,113,113,0.15); color: var(--danger); }
-
-  .history-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 6px 0;
-    border-bottom: 1px solid var(--border);
-    font-size: 13px;
-  }
-  .history-row:last-child { border-bottom: none; }
-  .history-row-right { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--accent2); }
-
-  /* SETUP */
-  .setup-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 16px;
-    margin-bottom: 12px;
-  }
-  .setup-card h2 { font-size: 14px; font-weight: 700; color: var(--accent2); margin-bottom: 8px; }
-  .setup-card p { font-size: 12px; color: var(--text-muted); line-height: 1.6; margin-bottom: 12px; }
-
-  .step-list { list-style: none; counter-reset: step; }
-  .step-list li {
-    counter-increment: step;
-    font-size: 12px;
-    color: var(--text-muted);
-    padding: 6px 0 6px 28px;
-    position: relative;
-    line-height: 1.6;
-  }
-  .step-list li::before {
-    content: counter(step);
-    position: absolute; left: 0; top: 7px;
-    width: 18px; height: 18px;
-    background: var(--accent2); color: var(--bg);
-    border-radius: 50%; font-size: 10px; font-weight: 700;
-    display: flex; align-items: center; justify-content: center;
-  }
-  .step-list li code {
-    background: var(--surface2); border: 1px solid var(--border);
-    padding: 1px 5px; border-radius: 4px;
-    font-family: 'DM Mono', monospace; font-size: 11px; color: var(--accent);
-  }
-
-  .gas-script {
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    min-height: 180px;
-    color: #a0a0c0;
-    background: #111118;
-    border-color: var(--border);
-    line-height: 1.7;
-  }
-
-  .connected-badge {
-    display: inline-flex; align-items: center; gap: 5px;
-    font-size: 11px; color: var(--accent);
-    background: rgba(110,231,183,0.1);
-    border: 1px solid rgba(110,231,183,0.3);
-    padding: 4px 10px; border-radius: 20px;
-  }
-  .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
-
-  /* EMPTY STATE */
-  .empty-state { text-align: center; padding: 50px 20px; color: var(--text-muted); }
-  .empty-state .icon { font-size: 40px; margin-bottom: 12px; }
-
-  /* LOADING OVERLAY */
-  .loading-overlay {
-    display: none;
-    position: fixed; inset: 0;
-    background: rgba(15,15,19,0.85);
-    z-index: 200;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 16px;
+    gap: 8px;
   }
-  .loading-overlay.show { display: flex; }
-  .loading-ring {
-    width: 48px; height: 48px;
-    border: 3px solid var(--border);
-    border-top-color: var(--accent);
-    border-radius: 50%;
-    animation: spin 0.7s linear infinite;
-  }
-  .loading-text { color: var(--text-muted); font-size: 14px; }
 
+  .btn-submit:active { transform: scale(0.97); filter: brightness(0.9); }
+  .btn-submit:disabled { opacity: 0.45; pointer-events: none; }
+
+  .spacer-bottom { height: 40px; }
+
+  /* ---- SPINNER ---- */
+  .spinner {
+    width: 18px; height: 18px;
+    border: 2.5px solid rgba(0,0,0,0.25);
+    border-top-color: #0f0f13;
+    border-radius: 50%;
+    animation: spin 0.65s linear infinite;
+  }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* OFFLINE BANNER */
-  .offline-banner {
+  /* ---- OFFLINE ---- */
+  .offline-bar {
     display: none;
-    background: rgba(248,113,113,0.15);
+    background: rgba(248,113,113,0.12);
     border-bottom: 1px solid rgba(248,113,113,0.3);
     color: var(--danger);
     text-align: center;
     font-size: 12px;
     font-weight: 600;
-    padding: 8px;
+    padding: 7px;
   }
-  .offline-banner.show { display: block; }
+  .offline-bar.show { display: block; }
 
-  /* TOAST */
+  /* ---- TOAST ---- */
   .toast {
     position: fixed;
-    bottom: calc(72px + var(--safe-bottom) + 10px);
-    left: 50%; transform: translateX(-50%) translateY(10px);
-    background: var(--surface2); border: 1px solid var(--border);
-    color: var(--text); padding: 12px 20px;
-    border-radius: 100px; font-size: 13px; font-weight: 500;
-    z-index: 150; opacity: 0; transition: all 0.25s;
-    white-space: nowrap; max-width: 90vw;
+    bottom: calc(24px + var(--safe-bottom));
+    left: 50%;
+    transform: translateX(-50%) translateY(12px);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 12px 22px;
+    border-radius: 100px;
+    font-size: 13px;
+    font-weight: 600;
+    z-index: 999;
+    opacity: 0;
+    transition: all 0.25s;
+    white-space: nowrap;
+    max-width: 88vw;
+    text-align: center;
   }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-  .toast.success { border-color: var(--accent); color: var(--accent); }
-  .toast.error { border-color: var(--danger); color: var(--danger); }
+  .toast.ok  { border-color: var(--accent); color: var(--accent); }
+  .toast.err { border-color: var(--danger); color: var(--danger); }
 
-  .section-label {
-    font-size: 11px; font-weight: 700;
-    letter-spacing: 0.08em; color: var(--text-muted);
-    text-transform: uppercase; margin-bottom: 10px;
+  /* ---- HISTORY ---- */
+  .history-wrap { padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+
+  .h-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 16px;
   }
+
+  .h-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .h-date { font-size: 13px; font-weight: 700; color: var(--accent); }
+  .h-time { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  .h-badge {
+    font-size: 11px;
+    padding: 3px 9px;
+    border-radius: 20px;
+  }
+  .h-badge.ok  { background: rgba(110,231,183,0.12); color: var(--accent); }
+  .h-badge.err { background: rgba(248,113,113,0.12); color: var(--danger); }
+
+  .h-row { display: flex; justify-content: space-between; padding: 4px 0; font-size: 13px; }
+  .h-label { color: var(--muted); font-size: 12px; }
+  .h-val { font-weight: 500; }
+  .h-menu { color: var(--accent2); font-weight: 700; }
+
+  .empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--muted);
+  }
+  .empty .ico { font-size: 40px; margin-bottom: 12px; }
+
+  /* ---- SETUP ---- */
+  .setup-wrap { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+
+  .s-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+  }
+
+  .s-card h3 { font-size: 13px; font-weight: 700; color: var(--accent2); margin-bottom: 10px; }
+  .s-card p  { font-size: 12px; color: var(--muted); line-height: 1.7; margin-bottom: 10px; }
+
+  .steps { list-style: none; counter-reset: s; }
+  .steps li {
+    counter-increment: s;
+    font-size: 12px; color: var(--muted);
+    padding: 5px 0 5px 26px;
+    position: relative; line-height: 1.6;
+  }
+  .steps li::before {
+    content: counter(s);
+    position: absolute; left: 0; top: 6px;
+    width: 17px; height: 17px;
+    background: var(--accent2); color: #0f0f13;
+    border-radius: 50%; font-size: 10px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .steps li code {
+    background: var(--surface2); border: 1px solid var(--border);
+    padding: 1px 5px; border-radius: 4px;
+    font-size: 11px; color: var(--accent);
+  }
+
+  .gas-code {
+    font-family: monospace;
+    font-size: 11px;
+    min-height: 160px;
+    color: #9090b8;
+    background: #0a0a10;
+    border-color: var(--border);
+    line-height: 1.7;
+  }
+
+  .btn-copy {
+    width: 100%;
+    padding: 12px;
+    margin-top: 8px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .url-status { margin-top: 8px; font-size: 12px; }
+  .url-ok   { color: var(--accent); }
+  .url-warn { color: var(--danger); }
+  .url-none { color: var(--muted); }
 </style>
 </head>
 <body>
 
-<!-- OFFLINE BANNER -->
-<div class="offline-banner" id="offlineBanner">📡 オフラインです。送信にはネット接続が必要です。</div>
+<div class="offline-bar" id="offlineBar">📡 オフラインです</div>
 
-<!-- HEADER -->
 <header>
-  <h1>📋 日報アプリ</h1>
-  <p id="headerSub">Google スプレッドシートに自動送信</p>
+  <h1>📋 日報</h1>
+  <div class="header-tab">
+    <button class="htab active" id="tab-form"    onclick="go('form')">入力</button>
+    <button class="htab"        id="tab-history" onclick="go('history')">履歴</button>
+    <button class="htab"        id="tab-setup"   onclick="go('setup')">設定</button>
+  </div>
 </header>
 
-<!-- INPUT PAGE -->
-<div id="page-input" class="page active">
+<!-- ======== FORM ======== -->
+<div id="page-form" class="page active">
+  <div class="form-wrap">
 
-  <div class="card" style="margin-bottom:12px">
-    <div class="field" style="margin-bottom:0">
-      <label>📅 日付</label>
-      <input type="date" id="reportDate">
+    <div class="field">
+      <label>日付</label>
+      <input type="date" id="fDate">
     </div>
-  </div>
-
-  <div class="section-label">登録済み顧客</div>
-  <div class="customer-list" id="customerList"></div>
-
-  <div class="card">
-    <h2>＋ 顧客を追加</h2>
 
     <div class="field">
       <label>顧客名</label>
-      <input type="text" id="customerName" placeholder="例：山田 花子"
+      <input type="text" id="fName" placeholder="山田 花子"
         inputmode="text" autocomplete="off" autocorrect="off">
     </div>
 
     <div class="field">
       <label>メニュー</label>
-      <select id="customerMenu">
-        <option value="">選択してください</option>
-        <option value="HP">HP</option>
-        <option value="WAX">WAX</option>
-        <option value="F">F</option>
-        <option value="Combi">Combi</option>
-        <option value="Keep">Keep</option>
-        <option value="After">After</option>
-      </select>
+      <div class="chip-group" id="chipGroup">
+        <button class="chip" onclick="selectChip(this,'HP')">HP</button>
+        <button class="chip" onclick="selectChip(this,'WAX')">WAX</button>
+        <button class="chip" onclick="selectChip(this,'F')">F</button>
+        <button class="chip" onclick="selectChip(this,'Combi')">Combi</button>
+        <button class="chip" onclick="selectChip(this,'Keep')">Keep</button>
+        <button class="chip" onclick="selectChip(this,'After')">After</button>
+        <button class="chip" onclick="selectChip(this,'__other__')">その他</button>
+      </div>
+      <input type="hidden" id="fMenu">
+      <input type="text" id="fMenuOther"
+        placeholder="メニュー内容を入力"
+        inputmode="text" autocorrect="off"
+        style="display:none;margin-top:10px">
     </div>
 
-    <div class="row-2">
+    <div class="row2">
       <div class="field">
         <label>所要時間（分）</label>
-        <input type="tel" id="customerDuration" placeholder="60"
+        <input type="tel" id="fDuration" placeholder="60"
           inputmode="numeric" pattern="[0-9]*">
       </div>
       <div class="field">
         <label>会計額（円）</label>
-        <input type="tel" id="customerPrice" placeholder="5000"
+        <input type="tel" id="fPrice" placeholder="5000"
           inputmode="numeric" pattern="[0-9]*">
       </div>
     </div>
 
     <div class="field">
       <label>メモ（任意）</label>
-      <input type="text" id="customerMemo" placeholder="特記事項など"
-        inputmode="text" autocorrect="off">
+      <textarea id="fMemo" placeholder="特記事項など"></textarea>
     </div>
 
-    <button class="btn-add" onclick="addCustomer()">＋ この顧客を追加</button>
   </div>
 
-  <div style="height:16px"></div>
-  <button class="btn btn-primary" id="submitBtn" onclick="submitReport()">
-    📤 スプレッドシートに送信
-  </button>
+  <div class="submit-wrap">
+    <button class="btn-submit" id="submitBtn" onclick="submit()">
+      送信
+    </button>
+  </div>
+  <div class="spacer-bottom"></div>
 </div>
 
-<!-- HISTORY PAGE -->
+<!-- ======== HISTORY ======== -->
 <div id="page-history" class="page">
-  <div class="section-label">送信履歴</div>
-  <div id="historyList"></div>
+  <div class="history-wrap" id="historyList"></div>
 </div>
 
-<!-- SETUP PAGE -->
+<!-- ======== SETUP ======== -->
 <div id="page-setup" class="page">
-  <div class="setup-card">
-    <h2>🔗 スプレッドシート連携</h2>
-    <p>GASを使ってスプレッドシートに自動記録します。</p>
-    <ul class="step-list">
-      <li>Googleスプレッドシートを開く</li>
-      <li><code>拡張機能</code> → <code>Apps Script</code> を開く</li>
-      <li>下のスクリプトをコピーして貼り付け・保存</li>
-      <li><code>デプロイ</code> → <code>新しいデプロイ</code> → 種類: <code>ウェブアプリ</code></li>
-      <li>アクセス: <code>全員</code> にしてデプロイ</li>
-      <li>発行されたURLを下に貼り付ける</li>
-    </ul>
-  </div>
+  <div class="setup-wrap">
 
-  <div class="setup-card">
-    <h2>📜 GAS スクリプト</h2>
-    <textarea class="gas-script" readonly onclick="this.select()">function doPost(e) {
+    <div class="s-card">
+      <h3>🔗 スプレッドシート連携</h3>
+      <p>GASを使ってスプレッドシートに記録します。</p>
+      <ul class="steps">
+        <li>Googleスプレッドシートを開く</li>
+        <li><code>拡張機能</code> → <code>Apps Script</code> を開く</li>
+        <li>下のスクリプトを貼り付けて保存</li>
+        <li><code>デプロイ</code> → <code>新しいデプロイ</code> → <code>ウェブアプリ</code></li>
+        <li>アクセス: <code>全員</code> でデプロイ</li>
+        <li>発行されたURLを下に入力</li>
+      </ul>
+    </div>
+
+    <div class="s-card">
+      <h3>📜 GASスクリプト</h3>
+      <textarea class="gas-code" readonly onclick="this.select()">function doPost(e) {
   var sheet = SpreadsheetApp.getActiveSheet();
-  var data = JSON.parse(e.postData.contents);
+  var d = JSON.parse(e.postData.contents);
   if (sheet.getLastRow() === 0) {
     sheet.appendRow(['日付','顧客名','メニュー','所要時間(分)','会計額(円)','メモ','送信日時']);
   }
-  var now = new Date().toLocaleString('ja-JP');
-  for (var i = 0; i < data.customers.length; i++) {
-    var c = data.customers[i];
-    sheet.appendRow([data.date, c.name, c.menu, c.duration, c.price, c.memo, i===0?now:'']);
-  }
-  return ContentService.createTextOutput(JSON.stringify({status:'ok'})).setMimeType(ContentService.MimeType.JSON);
+  sheet.appendRow([
+    d.date, d.name, d.menu,
+    d.duration, d.price, d.memo,
+    new Date().toLocaleString('ja-JP')
+  ]);
+  return ContentService
+    .createTextOutput(JSON.stringify({status:'ok'}))
+    .setMimeType(ContentService.MimeType.JSON);
 }
 function doGet(e) {
-  return ContentService.createTextOutput(JSON.stringify({status:'ok'})).setMimeType(ContentService.MimeType.JSON);
+  return ContentService
+    .createTextOutput(JSON.stringify({status:'ok'}))
+    .setMimeType(ContentService.MimeType.JSON);
 }</textarea>
-    <button class="btn btn-secondary" onclick="copyScript()" style="margin-top:10px">📋 スクリプトをコピー</button>
-  </div>
-
-  <div class="setup-card">
-    <h2>🌐 WebアプリURL</h2>
-    <div class="field">
-      <label>デプロイURLを貼り付け</label>
-      <input type="text" id="gasUrl" placeholder="https://script.google.com/macros/s/..."
-        oninput="saveUrl()" autocomplete="off" autocorrect="off" autocapitalize="off">
+      <button class="btn-copy" onclick="copyGas()">📋 コピー</button>
     </div>
-    <div id="urlStatus"></div>
+
+    <div class="s-card">
+      <h3>🌐 WebアプリURL</h3>
+      <div class="field">
+        <label>デプロイURLを貼り付け</label>
+        <input type="text" id="gasUrlInput"
+          placeholder="https://script.google.com/macros/s/..."
+          oninput="saveUrl()"
+          autocomplete="off" autocorrect="off" autocapitalize="off">
+      </div>
+      <div class="url-status" id="urlStatus"></div>
+    </div>
+
   </div>
 </div>
 
-<!-- BOTTOM NAV -->
-<nav class="bottom-nav">
-  <button class="nav-btn active" id="nav-input" onclick="switchTab('input')">
-    <span class="icon">✏️</span>入力
-  </button>
-  <button class="nav-btn" id="nav-history" onclick="switchTab('history')">
-    <span class="icon">📅</span>履歴
-  </button>
-  <button class="nav-btn" id="nav-setup" onclick="switchTab('setup')">
-    <span class="icon">⚙️</span>設定
-  </button>
-</nav>
-
-<!-- LOADING OVERLAY -->
-<div class="loading-overlay" id="loadingOverlay">
-  <div class="loading-ring"></div>
-  <div class="loading-text">送信中...</div>
-</div>
-
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
 <script>
 // ---- STATE ----
-let customers = [];
+let selectedMenu = '';
 let gasUrl = localStorage.getItem('gasUrl') || '';
-let reportHistory = JSON.parse(localStorage.getItem('reportHistory') || '[]');
+let logs = JSON.parse(localStorage.getItem('logs') || '[]');
 
 // ---- INIT ----
-document.getElementById('reportDate').value = todayStr();
-document.getElementById('gasUrl').value = gasUrl;
+document.getElementById('fDate').value = today();
+document.getElementById('gasUrlInput').value = gasUrl;
 updateUrlStatus();
-renderHistory();
-checkOnline();
+window.addEventListener('online',  () => document.getElementById('offlineBar').classList.remove('show'));
+window.addEventListener('offline', () => document.getElementById('offlineBar').classList.add('show'));
+if (!navigator.onLine) document.getElementById('offlineBar').classList.add('show');
 
-// オフライン監視
-window.addEventListener('online',  () => updateOnlineBanner(true));
-window.addEventListener('offline', () => updateOnlineBanner(false));
-
-function updateOnlineBanner(isOnline) {
-  document.getElementById('offlineBanner').classList.toggle('show', !isOnline);
-}
-function checkOnline() { updateOnlineBanner(navigator.onLine); }
-
-function todayStr() {
+function today() {
   return new Date().toISOString().split('T')[0];
 }
 
 // ---- TABS ----
-function switchTab(name) {
-  ['input','history','setup'].forEach(t => {
+function go(name) {
+  ['form','history','setup'].forEach(t => {
     document.getElementById('page-' + t).classList.toggle('active', t === name);
-    document.getElementById('nav-' + t).classList.toggle('active', t === name);
+    document.getElementById('tab-' + t).classList.toggle('active', t === name);
   });
   if (name === 'history') renderHistory();
 }
 
-// ---- ADD CUSTOMER ----
-function addCustomer() {
-  const name     = document.getElementById('customerName').value.trim();
-  const menu     = document.getElementById('customerMenu').value;
-  const duration = document.getElementById('customerDuration').value.trim();
-  const price    = document.getElementById('customerPrice').value.trim();
-  const memo     = document.getElementById('customerMemo').value.trim();
-
-  if (!name) { showToast('顧客名を入力してください', 'error'); return; }
-  if (!menu) { showToast('メニューを選択してください', 'error'); return; }
-
-  customers.push({ name, menu, duration, price, memo });
-
-  // フォームリセット
-  ['customerName','customerMenu','customerDuration','customerPrice','customerMemo']
-    .forEach(id => document.getElementById(id).value = '');
-
-  renderCustomers();
-  document.getElementById('customerName').focus();
-}
-
-function removeCustomer(i) {
-  customers.splice(i, 1);
-  renderCustomers();
-}
-
-function renderCustomers() {
-  const el = document.getElementById('customerList');
-  if (customers.length === 0) {
-    el.innerHTML = '<p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;padding-left:4px">まだ追加されていません</p>';
-    return;
+// ---- MENU CHIPS ----
+function selectChip(el, val) {
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedMenu = val;
+  const otherInput = document.getElementById('fMenuOther');
+  if (val === '__other__') {
+    otherInput.style.display = 'block';
+    otherInput.focus();
+  } else {
+    otherInput.style.display = 'none';
+    otherInput.value = '';
   }
-  el.innerHTML = customers.map((c, i) => `
-    <div class="customer-item">
-      <div class="customer-info">
-        <div class="customer-name">${c.name}</div>
-        <div class="customer-meta">
-          <span class="customer-menu-tag">${c.menu}</span>
-          ${c.duration ? c.duration + '分' : ''}
-          ${c.price ? ' · ¥' + Number(c.price).toLocaleString() : ''}
-          ${c.memo ? ' · ' + c.memo : ''}
-        </div>
-      </div>
-      <button class="btn-delete" onclick="removeCustomer(${i})">×</button>
-    </div>
-  `).join('');
+  document.getElementById('fMenu').value = val;
 }
 
 // ---- SUBMIT ----
-async function submitReport() {
-  if (!navigator.onLine) {
-    showToast('📡 オフラインです。接続を確認してください', 'error');
-    return;
-  }
-  if (!gasUrl) {
-    showToast('設定でURLを入力してください', 'error');
-    switchTab('setup');
-    return;
-  }
-  if (customers.length === 0) {
-    showToast('顧客を1件以上追加してください', 'error');
-    return;
-  }
+async function submit() {
+  const date     = document.getElementById('fDate').value;
+  const name     = document.getElementById('fName').value.trim();
+  const menu     = selectedMenu === '__other__'
+    ? document.getElementById('fMenuOther').value.trim()
+    : selectedMenu;
+  const duration = document.getElementById('fDuration').value.trim();
+  const price    = document.getElementById('fPrice').value.trim();
+  const memo     = document.getElementById('fMemo').value.trim();
 
-  const overlay = document.getElementById('loadingOverlay');
+  if (!name)     { toast('顧客名を入力してください', 'err'); return; }
+  if (!selectedMenu) { toast('メニューを選択してください', 'err'); return; }
+  if (!menu)     { toast('その他の内容を入力してください', 'err'); return; }
+  if (!gasUrl)   { toast('設定でURLを入力してください', 'err'); go('setup'); return; }
+  if (!navigator.onLine) { toast('📡 オフラインです', 'err'); return; }
+
   const btn = document.getElementById('submitBtn');
-  overlay.classList.add('show');
   btn.disabled = true;
+  btn.innerHTML = '<div class="spinner"></div>';
 
-  const payload = {
-    date: document.getElementById('reportDate').value,
-    customers: customers
-  };
+  const payload = { date, name, menu, duration, price, memo };
 
   try {
     await fetch(gasUrl, {
@@ -662,67 +561,66 @@ async function submitReport() {
       headers: { 'Content-Type': 'text/plain' }
     });
 
-    // 送信成功
-    saveHistory(payload, true);
-    overlay.classList.remove('show');
+    savelog(payload, true);
+    resetForm();
     btn.disabled = false;
-
-    // フォーム全リセット
-    customers = [];
-    renderCustomers();
-    document.getElementById('reportDate').value = todayStr();
-
-    showToast('✅ 送信完了！', 'success');
-    setTimeout(() => switchTab('history'), 1000);
+    btn.innerHTML = '送信';
+    toast('✅ 送信しました！', 'ok');
 
   } catch(e) {
-    saveHistory(payload, false);
-    overlay.classList.remove('show');
+    savelog(payload, false);
     btn.disabled = false;
-    showToast('⚠️ 送信に失敗しました', 'error');
+    btn.innerHTML = '送信';
+    toast('⚠️ 送信失敗しました', 'err');
   }
 }
 
-function saveHistory(payload, success) {
-  reportHistory.unshift({ ...payload, success, sentAt: new Date().toLocaleString('ja-JP') });
-  if (reportHistory.length > 50) reportHistory = reportHistory.slice(0, 50);
-  localStorage.setItem('reportHistory', JSON.stringify(reportHistory));
+function resetForm() {
+  document.getElementById('fDate').value = today();
+  document.getElementById('fName').value = '';
+  document.getElementById('fDuration').value = '';
+  document.getElementById('fPrice').value = '';
+  document.getElementById('fMemo').value = '';
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+  document.getElementById('fMenuOther').style.display = 'none';
+  document.getElementById('fMenuOther').value = '';
+  selectedMenu = '';
 }
 
-// ---- HISTORY ----
+// ---- LOGS ----
+function savelog(payload, ok) {
+  logs.unshift({ ...payload, ok, at: new Date().toLocaleString('ja-JP') });
+  if (logs.length > 60) logs = logs.slice(0, 60);
+  localStorage.setItem('logs', JSON.stringify(logs));
+}
+
 function renderHistory() {
   const el = document.getElementById('historyList');
-  if (reportHistory.length === 0) {
-    el.innerHTML = '<div class="empty-state"><div class="icon">📭</div>まだ送信履歴がありません</div>';
+  if (!logs.length) {
+    el.innerHTML = '<div class="empty"><div class="ico">📭</div>まだ履歴がありません</div>';
     return;
   }
-  el.innerHTML = reportHistory.map(r => `
-    <div class="history-item">
-      <div class="history-header">
+  el.innerHTML = logs.map(r => `
+    <div class="h-card">
+      <div class="h-top">
         <div>
-          <div class="history-date">${r.date}</div>
-          <div class="history-time">${r.sentAt}</div>
+          <div class="h-date">${r.date}</div>
+          <div class="h-time">${r.at}</div>
         </div>
-        <span class="history-status ${r.success ? 'status-ok' : 'status-fail'}">
-          ${r.success ? '✓ 送信済み' : '✗ 失敗'}
-        </span>
+        <span class="h-badge ${r.ok ? 'ok' : 'err'}">${r.ok ? '✓ 送信済み' : '✗ 失敗'}</span>
       </div>
-      ${r.customers.map(c => `
-        <div class="history-row">
-          <span>${c.name} <span style="color:var(--accent2);font-size:11px">${c.menu}</span></span>
-          <span class="history-row-right">
-            ${c.duration ? c.duration+'分' : '-'}
-            ${c.price ? ' / ¥'+Number(c.price).toLocaleString() : ''}
-          </span>
-        </div>
-      `).join('')}
+      <div class="h-row"><span class="h-label">顧客名</span><span class="h-val">${r.name}</span></div>
+      <div class="h-row"><span class="h-label">メニュー</span><span class="h-menu">${r.menu}</span></div>
+      ${r.duration ? `<div class="h-row"><span class="h-label">所要時間</span><span class="h-val">${r.duration}分</span></div>` : ''}
+      ${r.price    ? `<div class="h-row"><span class="h-label">会計額</span><span class="h-val">¥${Number(r.price).toLocaleString()}</span></div>` : ''}
+      ${r.memo     ? `<div class="h-row"><span class="h-label">メモ</span><span class="h-val">${r.memo}</span></div>` : ''}
     </div>
   `).join('');
 }
 
 // ---- SETUP ----
 function saveUrl() {
-  gasUrl = document.getElementById('gasUrl').value.trim();
+  gasUrl = document.getElementById('gasUrlInput').value.trim();
   localStorage.setItem('gasUrl', gasUrl);
   updateUrlStatus();
 }
@@ -730,30 +628,34 @@ function saveUrl() {
 function updateUrlStatus() {
   const el = document.getElementById('urlStatus');
   if (gasUrl && gasUrl.startsWith('https://script.google.com')) {
-    el.innerHTML = '<div class="connected-badge"><span class="dot"></span>URLが設定されています</div>';
+    el.className = 'url-status url-ok';
+    el.textContent = '✓ URLが設定されています';
   } else if (gasUrl) {
-    el.innerHTML = '<span style="font-size:12px;color:var(--danger)">⚠ URLの形式が正しくない可能性があります</span>';
+    el.className = 'url-status url-warn';
+    el.textContent = '⚠ URLの形式を確認してください';
   } else {
-    el.innerHTML = '<span style="font-size:12px;color:var(--text-muted)">URLが未設定です</span>';
+    el.className = 'url-status url-none';
+    el.textContent = 'URLが未設定です';
   }
 }
 
-function copyScript() {
-  const t = document.querySelector('.gas-script');
-  navigator.clipboard.writeText(t.value).then(() => showToast('📋 コピーしました', 'success'));
+function copyGas() {
+  navigator.clipboard.writeText(document.querySelector('.gas-code').value)
+    .then(() => toast('📋 コピーしました', 'ok'));
 }
 
 // ---- TOAST ----
-function showToast(msg, type = '') {
+function toast(msg, type) {
   const el = document.getElementById('toast');
   el.textContent = msg;
-  el.className = 'toast show ' + type;
-  setTimeout(() => { el.className = 'toast'; }, 2800);
+  el.className = 'toast show ' + (type || '');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => { el.className = 'toast'; }, 2600);
 }
 
 // ---- SERVICE WORKER ----
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').catch(console.error);
+  navigator.serviceWorker.register('sw.js').catch(() => {});
 }
 </script>
 </body>
